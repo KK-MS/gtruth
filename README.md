@@ -3,21 +3,22 @@ gtruth is a stereo camera and SLAM project
 
 # repo structure
 **Project structure**
+
 | Directory / File | Description |
 | ---------------- | ----------- |
-| /GroundTruth| Repo base directory|
-| -> bin/     | Compiled exe goes here|
+| GroundTruth | Repo base directory |
+| -> bin/     | Compiled exe goes here |
 | -> build/   | The compiler's build files |
-| -> config/ | The configuration of the project|
-| -> doc/ | Documnetation of any kind|
-| -> inc/ | Common structure or template required across project| 
+| -> config/ | The configuration of the project |
+| -> doc/ | Documnetation of any kind |
+| -> inc/ | Common structure or template required across project | 
 | -> res/ | Resources, assests, data | 
-| -> src/ | Source files written or edited by team| 
-| -> script/ | Script files written or edited by team|
-| -> test/ |Unit testing, regression testing required files and exes| 
-| -> tool/ | external or internal supporting tools|
-| -> examples/ | examples of how to use the project|
-| -> README | Readme file in .md format|
+| -> src/ | Source files written or edited by team | 
+| -> script/ | Script files written or edited by team |
+| -> test/ |Unit testing, regression testing required files and exes | 
+| -> tool/ | external or internal supporting tools |
+| -> examples/ | examples of how to use the project |
+| -> README | Readme file in .md format |
 | -> INSTALL | Installation / usage instructions |
 | -> COPYING | Copyright header |
 | -> ext/ | Contains external third-party libraries. |
