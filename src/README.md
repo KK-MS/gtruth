@@ -7,7 +7,8 @@ Source code of each module.
 
 ## src structure
 **src/ structure**
-     Contains source code of the modules.
+
+     src/ contains source code of the modules.
      |- README    | Readme file in .md format |
      |- imu/      | IN: SatGPS, IMU, localized GPS | OUT: Timestamp, IMU, SatGPS |
      |- stereo/   | IN: Timestamp, IMU, SatGPS | OUT: Timestamp, IMU, SatGPS, Stereo |
