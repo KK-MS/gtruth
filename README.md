@@ -3,6 +3,8 @@ gtruth is a stereo camera and SLAM project
 
 # repo structure
 **Project structure**
+| Directory / File | Description |
+| ---------------- | ----------- |
 | /GroundTruth| Repo base directory|
 | -> bin/     | Compiled exe goes here|
 | -> build/   | The compiler's build files |
