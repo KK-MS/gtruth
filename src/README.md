@@ -1,9 +1,9 @@
 # src
 Source code of each module.
-**Features**
-* Module is independent in terms of compilation and execution.
+
+* Module is **independent** in terms of compilation and execution.
 * Module's input and output is listed below.
-* Module's unit test is available in test/ tool/ script/
+* Module's **unit test** is available in test/ tool/ script/
 
 ## src structure
 **src/ structure**
