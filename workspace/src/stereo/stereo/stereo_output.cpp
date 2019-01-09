@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "stereo_parameters.h"
 
 #pragma comment (lib, "Ws2_32.lib")
 
@@ -353,7 +354,8 @@ int network_instream() {
 }
 
 
-int stream_to_network(std::vector<unsigned char> &buf) {
+int stream_to_network(std::vector<unsigned char> &buf) 
+{
 	char* data = reinterpret_cast<char*>(buf.data());
 
 	// Program assume the file is already opened.
@@ -393,9 +395,15 @@ int stereo_output_deinit()
 	return 0;
 }
 
-int stereo_output_camera(std::vector<unsigned char> &buf)
-{\
-	 //file_write(buf);
+//int stereo_output_camera(std::vector<unsigned char> &buf)
+int stereo_output_camera(unsigned char *frame_buffer)
+{
+	std::vector<unsigned char> vec_frame_buffer;
+
+	vec_frame_buffer.insert(vec_frame_buffer.end(), frame_buffer, frame_buffer + FRAME_SIZE);
+	
+	//file_write(buf);
+
 
 	 //stream_to_network(buf);
 

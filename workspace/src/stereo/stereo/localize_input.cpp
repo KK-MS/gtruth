@@ -51,8 +51,6 @@ void localize_rx_thread(void *param)
 	do {
 		
 		iResult = sendto(s, message, 10, 0, (struct sockaddr*)NULL, sizeof(servaddr));
-	//	printf("localize sendto stereo:%d \n", iResult);
-		//iResult = sendto(s, message, 88, 0, (struct sockaddr*)&servaddr, sizeof(servaddr));
 		if (iResult < 0) {
 			printf("\n Error localize_network_input_init : sendto %d \n", WSAGetLastError());
 			goto end_client_thread;

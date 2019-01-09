@@ -9,6 +9,8 @@
 #include <iostream>
 #include <iomanip>
 
+#include "stereo_parameters.h"
+
 using namespace std;
 using namespace cv;
 
@@ -41,14 +43,18 @@ int stereo_input_deinit() {
 	video_in.release();
 	return 0;
 }
-int stereo_input_camera(std::vector<uchar> &buf)
+
+int stereo_input_camera(unsigned char *frame_buffer)
 {
-	
+	std::vector<unsigned char> vec_frame_buffer;
+
+	vec_frame_buffer.insert(vec_frame_buffer.end(), frame_buffer, frame_buffer + FRAME_SIZE);
+
 	// Capature video frames
 	video_in >> frameCamera;
 
 	// Covert each frame to .jpeg format
-	cv::imencode(".jpeg", frameCamera, buf, params);
+	cv::imencode(".jpeg", frameCamera, vec_frame_buffer, params);
 
 	// Debug code to display received frame.
 	// Note: display is from camera
