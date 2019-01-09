@@ -1,0 +1,17 @@
+﻿  stdafx.cpp
+  localize.cpp
+  localize_input.cpp
+  stereo.cpp
+stereo.cpp(205): warning C4101: 'size': unreferenced local variable
+  stereo_input.cpp
+  stereo_output.cpp
+stereo_output.cpp(146): warning C4101: 'hints': unreferenced local variable
+stereo_output.cpp(247): warning C4553: '==': operator has no effect; did you intend '='?
+stereo_output.cpp(216): warning C4101: 'server_thread': unreferenced local variable
+stereo_output.cpp(318): warning C4553: '==': operator has no effect; did you intend '='?
+  Generating code
+  261 of 272 functions (96.0%) were compiled, the rest were copied from previous compilation.
+    12 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  stereo.vcxproj -> C:\prj\02-ZIM\repo\gtruth\workspace\src\stereo\x64\Release\stereo.exe

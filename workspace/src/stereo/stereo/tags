@@ -1,0 +1,93 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+ClientSocket	localize_input.cpp	/^static SOCKET ClientSocket = INVALID_SOCKET;$/;"	v	file:
+ClientSocket	stereo_output.cpp	/^static SOCKET ClientSocket = INVALID_SOCKET;$/;"	v	file:
+DEFAULT_BUFLEN	localize_input.cpp	20;"	d	file:
+DEFAULT_BUFLEN	stereo_output.cpp	36;"	d	file:
+DEFAULT_PORT	localize_input.cpp	21;"	d	file:
+DEFAULT_PORT	stereo_output.cpp	37;"	d	file:
+INPUT_SERVER_IP	localize_input.cpp	23;"	d	file:
+INPUT_SERVER_IP	stereo_output.cpp	76;"	d	file:
+INPUT_SERVER_PORT	localize_input.cpp	22;"	d	file:
+INPUT_SERVER_PORT	stereo_output.cpp	75;"	d	file:
+ListenSocket	stereo_output.cpp	/^static SOCKET ListenSocket = INVALID_SOCKET;$/;"	v	file:
+MAXLINE	localize_input.cpp	24;"	d	file:
+Points	utils.h	/^vector<Point2f> Points(vector<KeyPoint> keypoints)$/;"	f
+STATS_H	stats.h	2;"	d
+Stats	stats.h	/^    Stats() : matches(0),$/;"	f	struct:Stats
+Stats	stats.h	/^struct Stats$/;"	s
+Tracker	stereo.cpp	/^/;"	c	namespace:example	file:
+Tracker	stereo.cpp	/^/;"	f	class:example::Tracker
+UTILS_H	utils.h	2;"	d
+WIN32_LEAN_AND_MEAN	localize_input.cpp	10;"	d	file:
+WIN32_LEAN_AND_MEAN	stereo_output.cpp	25;"	d	file:
+_WINSOCK_DEPRECATED_NO_WARNINGS	localize_input.cpp	3;"	d	file:
+_WINSOCK_DEPRECATED_NO_WARNINGS	stereo_output.cpp	8;"	d	file:
+akaze_thresh	stereo.cpp	/^/;"	v
+bb_min_inliers	stereo.cpp	/^/;"	v
+buffer	localize_input.cpp	/^char buffer[100];$/;"	v
+detector	stereo.cpp	/^/;"	m	class:example::Tracker	file:
+drawBoundingBox	utils.h	/^void drawBoundingBox(Mat image, vector<Point2f> bb)$/;"	f
+drawStatistics	utils.h	/^void drawStatistics(Mat image, const Stats& stats)$/;"	f
+example	stereo.cpp	/^/;"	n	file:
+file_open	stereo_output.cpp	/^int file_open () {$/;"	f
+file_write	stereo_output.cpp	/^int file_write(std::vector<unsigned char> &buf) {$/;"	f
+first_desc	stereo.cpp	/^/;"	m	class:example::Tracker	file:
+first_frame	stereo.cpp	/^/;"	m	class:example::Tracker	file:
+first_kp	stereo.cpp	/^/;"	m	class:example::Tracker	file:
+fps	stats.h	/^    double fps;$/;"	m	struct:Stats
+frameCamera	stereo_input.cpp	/^static Mat frameCamera;$/;"	v	file:
+frameJpeg	stereo_input.cpp	/^static Mat frameJpeg;$/;"	v	file:
+gTerminateServer	stereo_output.cpp	/^static int gTerminateServer = FALSE;$/;"	v	file:
+getDetector	stereo.cpp	/^/;"	f	class:example::Tracker
+hServerThread	stereo_output.cpp	/^static HANDLE hServerThread;$/;"	v	file:
+inliers	stats.h	/^    int inliers;$/;"	m	struct:Stats
+keypoints	stats.h	/^    int keypoints;$/;"	m	struct:Stats
+localize_input_deinit	localize_input.cpp	/^int localize_input_deinit()$/;"	f
+localize_input_init	localize_input.cpp	/^int localize_input_init()$/;"	f
+localize_input_process	localize_input.cpp	/^int localize_input_process()$/;"	f
+localize_network_input_init	localize_input.cpp	/^int localize_network_input_init()$/;"	f
+localize_process	localize.cpp	/^int localize_process()$/;"	f
+main	stereo.cpp	/^/;"	f
+matcher	stereo.cpp	/^/;"	m	class:example::Tracker	file:
+matches	stats.h	/^    int matches;$/;"	m	struct:Stats
+message	localize_input.cpp	/^const char *message = "Hello Server";$/;"	v
+myFile	stereo_output.cpp	/^static ofstream myFile;$/;"	v	file:
+network_deinit	stereo_output.cpp	/^int network_deinit() {$/;"	f
+network_init	stereo_output.cpp	/^int network_init(int isUDPConnection)$/;"	f
+network_init1	stereo_output.cpp	/^int network_init1(int isUDPConnection)$/;"	f
+network_instream	stereo_output.cpp	/^int network_instream() {$/;"	f
+network_outstream	stereo_output.cpp	/^int network_outstream() {$/;"	f
+network_tcp_server	stereo_output.cpp	/^void network_tcp_server(void *param)$/;"	f
+network_udp_deinit	stereo_output.cpp	/^int network_udp_deinit() {$/;"	f
+network_udp_init	stereo_output.cpp	/^int network_udp_init() {$/;"	f
+network_udp_server	stereo_output.cpp	/^void network_udp_server(void *param)$/;"	f
+nn_match_ratio	stereo.cpp	/^/;"	v
+objectDetection	stereo.cpp	/^/;"	f
+object_bb	stereo.cpp	/^/;"	m	class:example::Tracker	file:
+operator +=	stats.h	/^    Stats& operator+=(const Stats& op) {$/;"	f	struct:Stats
+operator /=	stats.h	/^    Stats& operator\/=(int num)$/;"	f	struct:Stats
+params	stereo_input.cpp	/^static std::vector<int> params = { cv::IMWRITE_JPEG_QUALITY, 95 };$/;"	v	file:
+printStatistics	utils.h	/^void printStatistics(string name, Stats stats)$/;"	f
+process	stereo.cpp	/^/;"	f	class:example::Tracker
+ransac_thresh	stereo.cpp	/^/;"	v
+ratio	stats.h	/^    double ratio;$/;"	m	struct:Stats
+s	localize_input.cpp	/^static SOCKET s;$/;"	v	file:
+s	stereo_output.cpp	/^static SOCKET s;$/;"	v	file:
+servaddr	localize_input.cpp	/^static SOCKADDR_IN servaddr;$/;"	v	file:
+servaddr	stereo_output.cpp	/^static SOCKADDR_IN servaddr;$/;"	v	file:
+setFirstFrame	stereo.cpp	/^/;"	f	class:example::Tracker
+stats_update_period	stereo.cpp	/^/;"	v
+stereo_input_camera	stereo_input.cpp	/^int stereo_input_camera(std::vector<uchar> &buf)$/;"	f
+stereo_input_deinit	stereo_input.cpp	/^int stereo_input_deinit() {$/;"	f
+stereo_input_init	stereo_input.cpp	/^int stereo_input_init()$/;"	f
+stereo_output_camera	stereo_output.cpp	/^int stereo_output_camera(std::vector<unsigned char> &buf)$/;"	f
+stereo_output_deinit	stereo_output.cpp	/^int stereo_output_deinit()$/;"	f
+stereo_output_init	stereo_output.cpp	/^int stereo_output_init()$/;"	f
+strWinName	stereo_input.cpp	/^static String strWinName = "Stereo_Input";$/;"	v	file:
+stream_to_network	stereo_output.cpp	/^int stream_to_network(std::vector<unsigned char> &buf) {$/;"	f
+video_in	stereo_input.cpp	/^static VideoCapture video_in;$/;"	v	file:
