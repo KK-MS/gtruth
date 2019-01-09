@@ -10,7 +10,11 @@
 
 int stereo_input_init()
 {
-    // To be implemented
+    // Two interface
+    // 1. Stereo Camera input via xx
+    // 2. IMU data input via network 
+
+
     return 0;
 }
 
