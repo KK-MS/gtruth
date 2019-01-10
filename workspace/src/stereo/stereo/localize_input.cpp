@@ -1,25 +1,22 @@
 #include "stdafx.h"
 
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
-
-// Threads: to run streaming server
-#include <process.h>
-
 // Network related includes
-//#undef UNICODE
-
+// #undef UNICODE
 // Need older API support e.g. IPV4. Else result in "Error E0040"
 // E0040 expected an identifier ws2def.h
 #define WIN32_LEAN_AND_MEAN 
 
-
-
-#include <windows.h> // DEFAULT_PORT
-#include <ws2tcpip.h> // getaddrinfo, includes #include <winsock2.h>
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <windows.h> // DEFAULT_PORT
+#include <ws2tcpip.h> // getaddrinfo, includes #include <winsock2.h>
+
+
 #pragma comment (lib, "Ws2_32.lib")
+
+#include "localize_input.h"
 
 
 #define DEFAULT_BUFLEN 512
@@ -36,94 +33,58 @@ static SOCKET ClientSocket = INVALID_SOCKET;
 static SOCKET s;
 static SOCKADDR_IN servaddr;
 
-char buffer[100];
-const char *message = "Hello Server";
 
-static HANDLE hLocalizeRxThread;
-
-void localize_rx_thread(void *param)
+// Functions
+int localize_input_request_server(char *req_cmd, char *res_buf, int res_len)
 {
-	int iResult;
+	// printf("\nIn request_server M: %d, Rx:%d\n", sizeof(req_cmd), res_len);
+	// Request stereo server for the metadata.		
+	if (sendto(s, req_cmd, sizeof(req_cmd), 0, NULL, 0) < 0) { goto ret_err; }
 
-	// Send to server
-	printf("\nIn Localize client thread\n");
-	
-	do {
-		
-		iResult = sendto(s, message, 10, 0, (struct sockaddr*)NULL, sizeof(servaddr));
-		if (iResult < 0) {
-			printf("\n Error localize_network_input_init : sendto %d \n", WSAGetLastError());
-			goto end_client_thread;
-		}
+	// waiting and obtain metadata response 
+	if (recvfrom(s, res_buf, res_len, 0, NULL, NULL) < 0) { goto ret_err; }
 
-		// waiting for response 
-	//	printf("localize to recvfrom\n");
-		int len = sizeof(sockaddr_in); // need to specify lenght of address, else server will show as socket is not available 10057
-									   //iResult = recvfrom(s, buffer, sizeof(buffer), 0, (struct sockaddr*)&servaddr, &len);
-		iResult = recvfrom(s, buffer, sizeof(buffer), 0, (struct sockaddr*)NULL, NULL);
-		if (iResult < 0) {
-			printf("\n Error localize_network_input_init : recvfrom %d \n", WSAGetLastError());
-			goto end_client_thread;
-		}
-	//	printf("localize recvfrom stereo %d\n", iResult);
+	return 0;
 
-	} while (iResult > 0);
+ret_err:
+	printf("Localize: LastError :%d\n", WSAGetLastError());
+	return -1;
 
-end_client_thread:
-	printf("Localize client thread closing...\n");
-	closesocket(s);
-	WSACleanup();
-
-	return;
 }
 
-int localize_network_input_init()
+int localize_input_network_init()
 {
 	WSADATA wsaData;
-
-	int iResult;
+	int ret_val;
 
 	// Initialize Winsock
-	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-	if (iResult != 0) {
-		printf("WSAStartup failed with error: %d\n", iResult);
-		return 1;
-	}
+	ret_val = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (ret_val != 0) {	goto ret_err; }
 
 	s = socket(AF_INET, SOCK_DGRAM, 0); //Create socket
-	if (s == INVALID_SOCKET) {
-		printf("Error localize_network_input_init socket %d\n", WSAGetLastError());
-		return false; //Couldn't create the socket
-	}
+	if (s == INVALID_SOCKET) { goto ret_err; }
+
 	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(INPUT_SERVER_PORT); //Port to connect on
 	servaddr.sin_addr.s_addr = inet_addr(INPUT_SERVER_IP);
 	servaddr.sin_port = IPPROTO_UDP;
 
-	//INADDR_ANY; //accept any source address? 
-	// if we give server IP/ local address, then server sendto is resulting in error 
-	// that client socket is not availble inet_addr(INPUT_SERVER_IP); //Target IP
-
 	// connect to server 
-	if (connect(s, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
-		printf("\n Error localize_network_input_init : Connect %d \n", WSAGetLastError());
-		return 0; //exit(0);
-	}
-
-	printf("Starting localize_rx_thread\n");
+	ret_val = connect(s, (struct sockaddr *)&servaddr, sizeof(servaddr));
+	if (ret_val < 0) { goto ret_err; }
 	
-	hLocalizeRxThread = (HANDLE)_beginthread(localize_rx_thread, 0, NULL);
-
 	return 0;
+
+ret_err:
+	printf("\nError in localize_input_network_init: %d \n", WSAGetLastError());
+	return -1;
 }
  
-
-
 int localize_input_init()
 {
 	printf("In localize_input_init\n");
-	localize_network_input_init();
+	localize_input_network_init();
 
 	return 0;
 }
@@ -137,23 +98,24 @@ int localize_input_deinit()
 	// deinit the network connection
 	WSACleanup();
 	
-	printf("In WaitForSingleObject hLocalizeRxThread\n");
-	// WAIT for Server loop to end
-	WaitForSingleObject(hLocalizeRxThread, INFINITE);
-
-	printf("localize_input_deinit ends\n");
+	printf("In localize: localize_input_deinit ends\n");
 	return 0;
+}
+
+
+int localize_input_request_metadata(char *cmd, char *buf, int len)
+{
+	return localize_input_request_server(cmd, buf, len);
+}
+
+int localize_input_request_images(char *cmd, char *buf, int len)
+{
+	return localize_input_request_server(cmd, buf, len);
 }
 
 int localize_input_process()
 {
 	int iResult;
 	printf("In localize_input_process\n");
-	// waiting for response 
-	iResult = recvfrom(s, buffer, sizeof(buffer), 0, (struct sockaddr*)NULL, NULL);
-	if (iResult < 0) {
-		printf("\n Error localize_network_input_init : recvfrom %d \n", WSAGetLastError());
-		return 0;
-	}
 	return 0;
 }

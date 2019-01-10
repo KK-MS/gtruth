@@ -5,6 +5,11 @@
 #define FRAME_CHANNELS (1u) // 1 => Grayscale
 #define FRAME_SIZE     (FRAME_WIDTH * FRAME_HEIGHT * FRAME_CHANNELS)
 
+// Request tags
+#define REQ_METADATA "metadata"
+#define REQ_IMAGES   "stereoRL"
+#define MAX_REQ_SIZE (16u)
+
 struct stereo_data
 {
 	unsigned char metadata[64];			   // IMU + Stereo metadata

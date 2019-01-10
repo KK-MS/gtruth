@@ -45,8 +45,10 @@ static ofstream myFile;
 
 static SOCKET ListenSocket = INVALID_SOCKET;
 static SOCKET ClientSocket = INVALID_SOCKET;
-static int gTerminateServer = FALSE;
-static HANDLE hServerThread;
+
+
+//static struct stereo_data stereo_packet;
+
 //// OUTPUT TO FILE /////
 
 int file_open () {
@@ -78,134 +80,56 @@ int file_write(std::vector<unsigned char> &buf) {
 static SOCKET s;
 static SOCKADDR_IN servaddr;
 
-void network_udp_server(void *param)
+int stereo_output_request(struct stereo_data *stereo_packet)
 {
 	int iResult;
-
-	int iSendResult;
-	char recvbuf[DEFAULT_BUFLEN];
-	int recvbuflen = DEFAULT_BUFLEN;
-
-	//struct sockaddr cliaddr;
-	int len = sizeof(sockaddr_in); // need to specify lenght of address expected, else we get error 10014
 
 	sockaddr cliaddr;
+	int len = sizeof(sockaddr_in);
+
+	char req_msg[MAX_REQ_SIZE + 1]; // +1 to add null at last
+
+	char req_meta[] = REQ_METADATA;
+	char *res_meta = (char *)stereo_packet->metadata;
+	int len_meta = sizeof(stereo_packet->metadata);
+
+	char req_imgs[] = REQ_IMAGES;
+	char *res_imgs = (char *)stereo_packet->frame_right;
+	int len_imgs = sizeof(stereo_packet->frame_right) * 2; // Two frames L & R
 
 
-	cout << "In Stereo UDP Server" << endl;
-	// Receive until the peer shuts down the connection
-	do {
-		//printf("Stereo UDP recvfrom...\n");
-		//iResult = recvfrom(ListenSocket, recvbuf, recvbuflen, 0, &cliaddr, &len);
-		//iResult = recvfrom(s, recvbuf, recvbuflen, 0, NULL, 0);
-		iResult = recvfrom(s, recvbuf, recvbuflen, 0, &cliaddr, &len);
-		//	printf("Stereo bytes received: %d\n", iResult);
-
-		if (iResult > 0) {
-			recvbuf[iResult] = '\0';
-			// Echo the buffer back to the sender
-			 
-			//iSendResult = sendto(ListenSocket, recvbuf, recvbuflen, 0,
-			//	(const struct sockaddr *) &cliaddr, len);
-			iSendResult = sendto(s, recvbuf, recvbuflen, 0,
-          &cliaddr, len);
-				//(const struct sockaddr *) NULL, 0);
-
-			if (iSendResult < 0) {
-				printf("stereo send failed with error: %d\n", WSAGetLastError());
-				//goto end_server;
-
-			}
-		//	printf("stereo Bytes sent: %d\n", iSendResult);
-			
-		}
-		else if (iResult == 0) {
-			printf("NULL packet...\n");
-		}
-		else {
-			printf("recv failed with error: %d\n", WSAGetLastError());
-			goto end_server;
-
-		}
-
-		// TODO: Don't use global variable to pass termination signal. Use signals.
-	} while ((iResult > 0) || (gTerminateServer == FALSE));
-
-end_server:
-	printf("UDP Server closing...\n");
-	closesocket(s);
-	WSACleanup();
-}
-
-/*********************************************************************
-* Server with TCP connection
-*/
-void network_tcp_server(void *param)
-{
-	int iResult;
-	struct addrinfo *result = NULL;
-	struct addrinfo hints;
-
-	int iSendResult;
-	char recvbuf[DEFAULT_BUFLEN];
-	int recvbuflen = DEFAULT_BUFLEN;
-
-	printf("Network streaming server started listening...\n");
-
-	iResult = listen(ListenSocket, SOMAXCONN);
-	if (iResult == SOCKET_ERROR) { 
-		printf("listen error: %d\n", WSAGetLastError());
-		closesocket(ListenSocket);
-		WSACleanup();
-		return;
-	}
-	
-	// Accept a client socket
-	printf("Network streaming server started accepting...\n");
-	ClientSocket = accept(ListenSocket, NULL, NULL);
-	if (ClientSocket == INVALID_SOCKET) {
-		int iErrno = WSAGetLastError();
-		printf("accept error: %d\n", iErrno); // WSAGetLastError());
-		closesocket(ListenSocket);
-		WSACleanup();
-		return;
+	if ((iResult = recvfrom(s, req_msg, MAX_REQ_SIZE, 0, &cliaddr, &len)) < 0) {
+		goto ret_err;
 	}
 
-	// No longer need server socket
-	closesocket(ListenSocket);
+	req_msg[iResult] = '\0';
 
-	// Receive until the peer shuts down the connection
-	do {
-		iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
-		if (iResult > 0) {
-			printf("Bytes received: %d\n", iResult);
-			// Echo the buffer back to the sender
-			iSendResult = send(ClientSocket, recvbuf, iResult, 0);
-			if (iSendResult == SOCKET_ERROR) {
-				printf("send failed with error: %d\n", WSAGetLastError());
-				goto end_server;
-				
-			}
-			printf("Bytes sent: %d\n", iSendResult);
+	if (strcmp(req_msg, req_meta) == 0) {
+		//cout << "Stereo: Got REQ_METDATA" << endl;
+		if (sendto(s, res_meta, sizeof(res_meta), 0, &cliaddr, len) < 0) {
+			// TBD: just log and continue !!
+			goto ret_err;
 		}
-		else if (iResult == 0) {
-			printf("NULL packet...\n");
-		}
-		else {
-			printf("recv failed with error: %d\n", WSAGetLastError());
-			goto end_server;
-			
-		}
+	}
 
-		// TODO: Don't use global variable to pass termination signal. Use signals.
-	} while ((iResult > 0) || (gTerminateServer == FALSE));
-	
-end_server:
-	printf("Server closing...\n");
-	closesocket(ClientSocket);
-	WSACleanup();
+	else if (strcmp(req_msg, REQ_IMAGES) == 0) {
+		//cout << "Stereo: Got REQ_IMAGES" << endl;
+		if (sendto(s, res_imgs, sizeof(len_imgs), 0, &cliaddr, len) < 0) {
+			//  TBD: just log and continue !!
+			goto ret_err;
+		}
+	}
+	else {
+		// TODO: Log the invalid condition
+		printf("Stereo: Invalid command: %s, ret:%d\n", req_msg, iResult);
+	}
+	return 0;
+
+ret_err:
+	printf("Stereo: stereo_output_request LastError :%d\n", WSAGetLastError());
+	return -1;
+
 }
-
 
 
 int network_init(int isUDPConnection)
@@ -231,7 +155,6 @@ int network_init(int isUDPConnection)
 
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(INPUT_SERVER_PORT); //Port to connect on
-	//servaddr.sin_addr.s_addr = INADDR_ANY; // inet_addr(INPUT_SERVER_IP); //Target IP
 	servaddr.sin_addr.s_addr = inet_addr(INPUT_SERVER_IP);
 	servaddr.sin_port = IPPROTO_UDP;
 
@@ -244,81 +167,10 @@ int network_init(int isUDPConnection)
 		return 1;
 	}
 
-	cout << "Starting thread" << endl;
-	gTerminateServer == FALSE;
-	hServerThread = (HANDLE)_beginthread(network_udp_server, 0, NULL);
+	// cout << "Starting thread" << endl;
+	// gTerminateServer == FALSE;
+	// hServerThread = (HANDLE)_beginthread(network_udp_server, 0, NULL);
 
-	return 0;
-}
-
-int network_init1(int isUDPConnection)
-{
-	WSADATA wsaData;
-	int iResult;
-	struct addrinfo *result = NULL;
-	struct addrinfo hints;
-
-	// Function pointer to hold the server thread function
-	void (* server_thread )(void *param);
-	
-	// Need to memset hints to 0,
-	// Without this getaddrinfo fails with 11003
-	// info: 11003 "indicates nonrecoverable error occurred during a database lookup"
-	memset(&hints, 0, sizeof(hints)); 
-	
-	hints.ai_family = AF_INET;
-	hints.ai_flags = AI_PASSIVE;
-
-	if (isUDPConnection) {
-		hints.ai_socktype = SOCK_DGRAM;
-		server_thread = network_udp_server; 
-	}
-	else {
-		hints.ai_socktype = SOCK_STREAM;
-		hints.ai_protocol = IPPROTO_TCP;
-		server_thread = network_tcp_server;
-	}
-	
-	// Initialize Winsock
-	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-	if (iResult != 0) {
-		printf("WSAStartup failed with error: %d\n", iResult);
-		return 1;
-	}
-
-	// Resolve the server address and port
-	iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
-	if (iResult != 0) {
-		printf("getaddrinfo failed with error: %d\n", iResult);
-		WSACleanup();
-		return 1;
-	}
-	
-	// Create a SOCKET for connecting to server
-	ListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-	if (ListenSocket == INVALID_SOCKET) {
-		printf("socket failed with error: %ld\n", WSAGetLastError());
-		freeaddrinfo(result);
-		WSACleanup();
-		return 1;
-	}
-
-	// Setup the TCP listening socket
-	iResult = bind(ListenSocket, result->ai_addr, (int)result->ai_addrlen);
-	if (iResult == SOCKET_ERROR) {
-		printf("bind failed with error: %d\n", WSAGetLastError());
-		freeaddrinfo(result);
-		closesocket(ListenSocket);
-		WSACleanup();
-		return 1;
-	}
-
-	freeaddrinfo(result);
-	
-	cout << "Starting thread" << endl;
-	gTerminateServer == FALSE;
-	hServerThread = (HANDLE)_beginthread(server_thread, 0, NULL);
-	
 	return 0;
 }
 
@@ -326,10 +178,11 @@ int network_init1(int isUDPConnection)
  * Network deinit
  */
 int network_deinit() {
+
 	// deinit the network connection
+	closesocket(s);
 	WSACleanup();
-	// WAIT for Server loop to end
-	WaitForSingleObject(hServerThread, INFINITE);
+
 	cout << "stereo network_deinit ends" << endl;
 
 	return 0;
@@ -371,27 +224,15 @@ int stereo_output_init()
 	network_init(TRUE);
 
 
-	DWORD result;
-	do {
-		result = WaitForSingleObject(hServerThread, 0);
-
-		if (result == WAIT_OBJECT_0) {
-			// the thread handle is signaled - the thread has terminated
-			printf("\n Thread is signaled \n");
-		}
-		else {
-			printf("\n Thread is not terminated \n");
-			// the thread handle is not signaled - the thread is still alive
-		}
-	} while (result == WAIT_OBJECT_0);
-
 	return 0;
 }
 
 int stereo_output_deinit()
 {
 	//myFile.close();
+
 	network_deinit();
+	
 	return 0;
 }
 
@@ -404,8 +245,7 @@ int stereo_output_camera(unsigned char *frame_buffer)
 	
 	//file_write(buf);
 
-
-	 //stream_to_network(buf);
+    //stream_to_network(buf);
 
 	 return 0;
 }

@@ -35,7 +35,7 @@ int stereo_input_init()
 		cerr << "Couldn't open video " << iVideoCapNum << endl;
 		return 1;
 	}
-	
+
 	return 0;
 }
 
@@ -44,22 +44,34 @@ int stereo_input_deinit() {
 	return 0;
 }
 
-int stereo_input_camera(unsigned char *frame_buffer)
+int stereo_input_metadata(unsigned char *res_meta)
 {
-	std::vector<unsigned char> vec_frame_buffer;
 
-	vec_frame_buffer.insert(vec_frame_buffer.end(), frame_buffer, frame_buffer + FRAME_SIZE);
+	return 0;
+}
+
+int stereo_input_camera(unsigned char *buf_frames)
+{
+	unsigned char *buf_frame1 = buf_frames;
+	unsigned char *buf_frame2 = buf_frames + FRAME_SIZE;
+
+	std::vector<unsigned char> vec_right_frame;
+	std::vector<unsigned char> vec_left_frame;
+	
+	vec_right_frame.insert(vec_right_frame.end(), buf_frame1, buf_frame1 + FRAME_SIZE);
+	vec_right_frame.insert(vec_right_frame.end(), buf_frame2, buf_frame2 + FRAME_SIZE);
 
 	// Capature video frames
 	video_in >> frameCamera;
 
 	// Covert each frame to .jpeg format
-	cv::imencode(".jpeg", frameCamera, vec_frame_buffer, params);
+//	cv::imencode(".jpeg", frameCamera, vec_frame_buffer, params);
 
 	// Debug code to display received frame.
 	// Note: display is from camera
 	// TODO display the coverted JPEG frame
-	cv::resizeWindow(strWinName, frameCamera.size());
+//	cv::resizeWindow(strWinName, frameCamera.size());
+
 	imshow(strWinName, frameCamera);
 
 	return 0;
