@@ -39,6 +39,10 @@
 
 using namespace std;
 
+// MACROS
+#define TAG_SOP "SOP: " // Stereo module OUTPUT
+#define TAG_SNT "SNT: " // Stereo module network
+
 // GLOBAL VARIABLES
 
 static ofstream myFile;
@@ -80,40 +84,45 @@ int file_write(std::vector<unsigned char> &buf) {
 static SOCKET s;
 static SOCKADDR_IN servaddr;
 
-int stereo_output_request(struct stereo_data *stereo_packet)
+int stereo_output_request(struct stereo_object  *ptr_stereo_object)
 {
 	int iResult;
 
+	// Network related variables
 	sockaddr cliaddr;
 	int len = sizeof(sockaddr_in);
 
+	// Metadata variables
 	char req_msg[MAX_REQ_SIZE + 1]; // +1 to add null at last
+	const char *res_meta = (const char *)& (ptr_stereo_object->meta_pkt);
+	int len_meta = sizeof(ptr_stereo_object->meta_pkt);
 
-	char req_meta[] = REQ_METADATA;
-	char *res_meta = (char *)stereo_packet->metadata;
-	int len_meta = sizeof(stereo_packet->metadata);
-
+	// stereo data variables
 	char req_imgs[] = REQ_IMAGES;
-	char *res_imgs = (char *)stereo_packet->frame_right;
-	int len_imgs = sizeof(stereo_packet->frame_right) * 2; // Two frames L & R
+	char *res_imgs = (char *)ptr_stereo_object->ptr_frame_right;
+	int len_imgs = sizeof(ptr_stereo_object->ptr_frame_right) * 2; // Two frames L & R
 
-
+	// Receive the request message / command
+	//printf(TAG_SNT "Network: waiting to receive request message\n");
 	if ((iResult = recvfrom(s, req_msg, MAX_REQ_SIZE, 0, &cliaddr, &len)) < 0) {
+		printf(TAG_SNT "Error: recvfrom %d\n", WSAGetLastError());
 		goto ret_err;
 	}
 
 	req_msg[iResult] = '\0';
 
-	if (strcmp(req_msg, req_meta) == 0) {
-		//cout << "Stereo: Got REQ_METDATA" << endl;
+	// Process command to send metadata
+	if (strcmp(req_msg, REQ_METADATA) == 0) {
+		//cout << TAG_SNT "Stereo: Got REQ_METDATA" << endl;
 		if (sendto(s, res_meta, sizeof(res_meta), 0, &cliaddr, len) < 0) {
-			// TBD: just log and continue !!
+			// log and continue !!
+			printf(TAG_SNT "Error: send metadata %d\n", WSAGetLastError());
 			goto ret_err;
 		}
-	}
-
+	} 
+	// Process command to send stereo images
 	else if (strcmp(req_msg, REQ_IMAGES) == 0) {
-		//cout << "Stereo: Got REQ_IMAGES" << endl;
+		//cout << TAG_SNT "Stereo: Got REQ_IMAGES" << endl;
 		if (sendto(s, res_imgs, sizeof(len_imgs), 0, &cliaddr, len) < 0) {
 			//  TBD: just log and continue !!
 			goto ret_err;
@@ -121,18 +130,18 @@ int stereo_output_request(struct stereo_data *stereo_packet)
 	}
 	else {
 		// TODO: Log the invalid condition
-		printf("Stereo: Invalid command: %s, ret:%d\n", req_msg, iResult);
+		printf(TAG_SNT "Error: Invalid command: %s, ret:%d\n", req_msg, iResult);
 	}
 	return 0;
 
 ret_err:
-	printf("Stereo: stereo_output_request LastError :%d\n", WSAGetLastError());
+	//printf("Stereo: stereo_output_request LastError :%d\n", WSAGetLastError());
 	return -1;
 
 }
 
 
-int network_init(int isUDPConnection)
+int network_init()
 {
 	WSADATA wsaData;
 	int iResult;
@@ -158,7 +167,7 @@ int network_init(int isUDPConnection)
 	servaddr.sin_addr.s_addr = inet_addr(INPUT_SERVER_IP);
 	servaddr.sin_port = IPPROTO_UDP;
 
-	// Setup the TCP listening socket
+	// Setup the UDP listening socket
 	iResult = bind(s, (struct sockaddr*) &servaddr, (int)sizeof(servaddr));
 	if (iResult < 0) {
 		printf("bind failed with error: %d\n", WSAGetLastError());
@@ -217,13 +226,15 @@ int stream_to_network(std::vector<unsigned char> &buf)
 }
 
 //// STEREO OUTPUT API's /////
-int stereo_output_init()
+int stereo_output_init(struct stereo_object *ptr_stereo_object)
 {
 	//file_open();
 	printf("In stereo_output_init\n");
-	network_init(TRUE);
-
-
+	if (network_init() != 0) {
+		printf("Error: In network_init\n");
+		return -1;
+	}
+	printf("network_init ... OK\n");
 	return 0;
 }
 

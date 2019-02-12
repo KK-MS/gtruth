@@ -27,6 +27,9 @@
 
 using namespace std;
 
+// Macros
+#define TAG_LIN "LIN: "
+
 // GLOBAL VARIABLES
 
 static SOCKET ClientSocket = INVALID_SOCKET;
@@ -47,7 +50,7 @@ int localize_input_request_server(char *req_cmd, char *res_buf, int res_len)
 	return 0;
 
 ret_err:
-	printf("Localize: LastError :%d\n", WSAGetLastError());
+	printf(TAG_LIN "Localize: LastError :%d\n", WSAGetLastError());
 	return -1;
 
 }
@@ -77,13 +80,13 @@ int localize_input_network_init()
 	return 0;
 
 ret_err:
-	printf("\nError in localize_input_network_init: %d \n", WSAGetLastError());
+	printf(TAG_LIN "Error in localize_input_network_init: %d \n", WSAGetLastError());
 	return -1;
 }
  
 int localize_input_init()
 {
-	printf("In localize_input_init\n");
+	printf(TAG_LIN "In localize_input_init\n");
 	localize_input_network_init();
 
 	return 0;
@@ -91,14 +94,14 @@ int localize_input_init()
 
 int localize_input_deinit()
 {
-	printf("In localize_input_deinit\n");
+	printf(TAG_LIN "In localize_input_deinit\n");
 	
 	closesocket(s);
 	
 	// deinit the network connection
 	WSACleanup();
 	
-	printf("In localize: localize_input_deinit ends\n");
+	printf(TAG_LIN "In localize: localize_input_deinit ends\n");
 	return 0;
 }
 
@@ -116,6 +119,6 @@ int localize_input_request_images(char *cmd, char *buf, int len)
 int localize_input_process()
 {
 	int iResult;
-	printf("In localize_input_process\n");
+	printf(TAG_LIN "In localize_input_process\n");
 	return 0;
 }

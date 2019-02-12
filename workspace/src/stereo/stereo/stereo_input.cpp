@@ -9,71 +9,118 @@
 #include <iostream>
 #include <iomanip>
 
+#include "stereo_input.h"
 #include "stereo_parameters.h"
 
 using namespace std;
 using namespace cv;
 
-static VideoCapture video_in;
-static String strWinName = "Stereo_Input";
-static std::vector<int> params = { cv::IMWRITE_JPEG_QUALITY, 95 };
+static VideoCapture video_in_left;
+static VideoCapture video_in_right;
 
-static Mat frameCamera;
-static Mat frameJpeg;
+// Function defination
+void debug_print_stereo_object(struct stereo_object *ptr_stereo_object)
+{
+	printf("Stereo: H: %d\n", ptr_stereo_object->meta_pkt.frame_height);
+	printf("Stereo: W: %d\n", ptr_stereo_object->meta_pkt.frame_width);
+	printf("Stereo: ptrL: 0x%x\n", ptr_stereo_object->ptr_frame_left);
+
+}
+
+void debug_mat(Mat &mat_obj, const char *mat_name)
+{
+	printf("Mat %s: H %d\n", mat_name, mat_obj.rows);
+	printf("Mat %s: W %d\n", mat_name, mat_obj.cols);
+	printf("Mat %s: T %d\n", mat_name, mat_obj.type());
+	printf("Mat %s: D 0x%x\n", mat_name, mat_obj.data);
+}
 
 
-int stereo_input_init()
+int stereo_input_metadata(struct stereo_object *ptr_stereo_object)
+{
+
+	return 0;
+}
+
+int stereo_input_camera(struct stereo_object *ptr_stereo_object)
+{
+	Mat cam_frame;
+
+	Mat gray_image_left(
+		Size(ptr_stereo_object->meta_pkt.frame_width, ptr_stereo_object->meta_pkt.frame_height),
+		CV_8UC1);
+
+	gray_image_left.data = ptr_stereo_object->ptr_frame_left;
+
+	// Capature video frames
+	video_in_left >> cam_frame;
+
+	// Covert to gray scale
+	cv::cvtColor(cam_frame, gray_image_left, CV_BGR2GRAY);
+
+#ifdef DEBUG_STEREO_INPUT
+	// Debug: Show gray scale
+	imshow(WINDOW_STEREO_INPUT, gray_image_left);
+	
+	// Debug: Print the gray scale matrix details
+	debug_mat(gray_image_left, "Gray_input");
+#endif // DEBUG_STEREO_INPUT
+
+	return 0;
+
+}
+
+int stereo_input_deinit(struct stereo_object *ptr_stereo_object) 
+{
+	printf("In stereo_input_deinit\n");
+
+	video_in_left.release();
+	
+	free(ptr_stereo_object->ptr_frame_left);
+	free(ptr_stereo_object->ptr_frame_right);
+	free(ptr_stereo_object->ptr_jpeg_stream);
+	
+	return 0;
+}
+
+int stereo_input_init(struct stereo_object *ptr_stereo_object)
 {
 	Mat frame;
+	int frame_size;
+
 	int iVideoCapNum = 0;
 	printf("In stereo_input_init\n");
 
-	namedWindow(strWinName, WINDOW_NORMAL);
-	
-	video_in.open(iVideoCapNum);
-	if (!video_in.isOpened()) {
+	// Open the left side video input
+	video_in_left.open(iVideoCapNum);
+	if (!video_in_left.isOpened()) {
 		cerr << "Couldn't open video " << iVideoCapNum << endl;
 		return 1;
 	}
 
-	return 0;
-}
+	video_in_left >> frame;
 
-int stereo_input_deinit() {
-	video_in.release();
-	return 0;
-}
+	// both camera has same height, width
+	ptr_stereo_object->meta_pkt.frame_height = frame.rows;
+	ptr_stereo_object->meta_pkt.frame_width = frame.cols;
+	ptr_stereo_object->frame_size = frame.cols * frame.rows;
 
-int stereo_input_metadata(unsigned char *res_meta)
-{
+	printf("In stereo_input_init H:%d W:%d\n",
+		ptr_stereo_object->meta_pkt.frame_height,
+	    ptr_stereo_object->meta_pkt.frame_width
+		);
 
-	return 0;
-}
+	frame_size = frame.rows * frame.cols;
 
-int stereo_input_camera(unsigned char *buf_frames)
-{
-	unsigned char *buf_frame1 = buf_frames;
-	unsigned char *buf_frame2 = buf_frames + FRAME_SIZE;
+	// allocate memory to store the image raw and jpeg bytes
+	ptr_stereo_object->ptr_frame_left =
+		(unsigned char *) malloc(frame_size);
 
-	std::vector<unsigned char> vec_right_frame;
-	std::vector<unsigned char> vec_left_frame;
-	
-	vec_right_frame.insert(vec_right_frame.end(), buf_frame1, buf_frame1 + FRAME_SIZE);
-	vec_right_frame.insert(vec_right_frame.end(), buf_frame2, buf_frame2 + FRAME_SIZE);
+	ptr_stereo_object->ptr_frame_right =
+		(unsigned char *)malloc(frame_size);
 
-	// Capature video frames
-	video_in >> frameCamera;
-
-	// Covert each frame to .jpeg format
-//	cv::imencode(".jpeg", frameCamera, vec_frame_buffer, params);
-
-	// Debug code to display received frame.
-	// Note: display is from camera
-	// TODO display the coverted JPEG frame
-//	cv::resizeWindow(strWinName, frameCamera.size());
-
-	imshow(strWinName, frameCamera);
+	ptr_stereo_object->ptr_jpeg_stream =
+		(unsigned char *)malloc(frame_size * 2);
 
 	return 0;
-
 }
