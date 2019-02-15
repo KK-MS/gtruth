@@ -13,11 +13,12 @@
 #include <windows.h> // DEFAULT_PORT
 #include <ws2tcpip.h> // getaddrinfo, includes #include <winsock2.h>
 
-
-#pragma comment (lib, "Ws2_32.lib")
+#include <iostream>
 
 #include "localize_input.h"
 
+// Pragmas
+#pragma comment (lib, "Ws2_32.lib")
 
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "27015"
@@ -46,7 +47,7 @@ int localize_input_request_server(char *req_cmd, char *res_buf, int res_len)
 
 	// waiting and obtain metadata response 
 	if (recvfrom(s, res_buf, res_len, 0, NULL, NULL) < 0) { goto ret_err; }
-
+	//cv::cout << TAG_SNT "localize: Got REQ_IMAGES" << endl;
 	return 0;
 
 ret_err:
@@ -84,23 +85,46 @@ ret_err:
 	return -1;
 }
  
-int localize_input_init()
+int localize_input_init(struct stereo_object *ptr_system_object)
 {
 	printf(TAG_LIN "In localize_input_init\n");
+	
+	// TODO: Ring buffer
+	//
+	// allocate memory to store the jpeg bytes and decompressed frame
+	//
+	ptr_system_object->ptr_frame_left =
+		(unsigned char *)malloc(MAX_FRAME_SIZE);
+
+	ptr_system_object->ptr_frame_right =
+		(unsigned char *)malloc(MAX_FRAME_SIZE);
+
+	ptr_system_object->ptr_jpeg_stream =
+		(unsigned char *)malloc(MAX_FRAME_SIZE * 2);
+
+	// 
+	// Network init
+	//
 	localize_input_network_init();
 
 	return 0;
 }
 
-int localize_input_deinit()
+int localize_input_deinit(struct stereo_object *ptr_system_object)
 {
 	printf(TAG_LIN "In localize_input_deinit\n");
 	
+	// closer network first
 	closesocket(s);
 	
 	// deinit the network connection
 	WSACleanup();
-	
+
+	// Free the allocated memory at last
+	free(ptr_system_object->ptr_frame_left);
+	free(ptr_system_object->ptr_frame_right);
+	free(ptr_system_object->ptr_jpeg_stream);
+
 	printf(TAG_LIN "In localize: localize_input_deinit ends\n");
 	return 0;
 }
@@ -116,7 +140,7 @@ int localize_input_request_images(char *cmd, char *buf, int len)
 	return localize_input_request_server(cmd, buf, len);
 }
 
-int localize_input_process()
+int localize_input_process(struct stereo_object *ptr_system_object)
 {
 	int iResult;
 	printf(TAG_LIN "In localize_input_process\n");

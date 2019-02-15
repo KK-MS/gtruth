@@ -22,9 +22,9 @@ struct localize_object
 };
 
 // Function declaration
-int localize_input_init();
-int localize_input_deinit();
-int localize_input_process();
+int localize_input_init(struct stereo_object *ptr_system_object);
+int localize_input_deinit(struct stereo_object *ptr_system_object);
+int localize_input_process(struct stereo_object *ptr_system_object);
 
 int localize_input_request_metadata(char *cmd, char *buf, int len);
 int localize_input_request_images(char *cmd, char *buf, int len);

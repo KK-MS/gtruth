@@ -122,7 +122,7 @@ int stereo_output_request(struct stereo_object  *ptr_stereo_object)
 	} 
 	// Process command to send stereo images
 	else if (strcmp(req_msg, REQ_IMAGES) == 0) {
-		//cout << TAG_SNT "Stereo: Got REQ_IMAGES" << endl;
+		cout << TAG_SNT "Stereo: Got REQ_IMAGES" << endl;
 		if (sendto(s, res_imgs, sizeof(len_imgs), 0, &cliaddr, len) < 0) {
 			//  TBD: just log and continue !!
 			goto ret_err;

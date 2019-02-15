@@ -33,8 +33,14 @@
     <ClInclude Include="stereo_output.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="stereo_parameters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stereo_process.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="localize_input.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -56,5 +62,19 @@
     <ClCompile Include="localize.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="localize_process.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stereo_process.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Readme.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

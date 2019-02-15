@@ -4,6 +4,7 @@
 #define FRAME_HEIGHT   (720u)
 #define FRAME_CHANNELS (1u) // 1 => Grayscale
 #define FRAME_SIZE     (FRAME_WIDTH * FRAME_HEIGHT * FRAME_CHANNELS)
+#define MAX_FRAME_SIZE FRAME_SIZE
 
 // Request tags
 #define REQ_METADATA "metadata"
@@ -36,7 +37,8 @@ struct stereo_data
 	unsigned char frame_left[FRAME_SIZE];  // Stereo Left camera data 
 };
 
-struct stereo_object
+// TODO change to system_object, also the file name system_parameters.h
+struct stereo_object 
 {
 	// INOUT: Metadata
 	struct metadata_packet meta_pkt;

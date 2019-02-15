@@ -50,9 +50,9 @@ void localize_scheduler(void *param)
 		}
 
 		// GET IMAGE FRAMES
-		// if (localize_input_request_images(req_imgs, res_imgs, len_imgs) < 0) {
-		// 	goto end_client_thread;
-		// }
+		if (localize_input_request_images(req_imgs, res_imgs, len_imgs) < 0) {
+		    goto end_client_thread;
+		}
 
 		// PROCESS IMAGE FRAME
 
@@ -77,8 +77,12 @@ end_client_thread:
 int localize_execute()
 {
 	printf(TAG_LOC "In localize_execute\n");
+	
+	// create a memory space for system object
+	struct stereo_object * ptr_system_object =
+		(struct stereo_object *) malloc(sizeof(struct stereo_object));
 
-	if (localize_input_init() < 0) {
+	if (localize_input_init(ptr_system_object) < 0) {
 		goto err_output;
 	}
 
@@ -94,7 +98,7 @@ int localize_terminate()
 {
 	printf(TAG_LOC "In localize_terminate\n");
 
-	localize_input_deinit();
+	//localize_input_deinit();
 	
 	printf(TAG_LOC "In localize: WaitForSingleObject h_localize_scheduler\n");
 	// WAIT for Server loop to end
